@@ -6,11 +6,14 @@ from pathlib import Path
 def schema_path(name):
     return str(Path(__file__).parent.parent.joinpath(f'schemas/{name}'))
 
-def test_create_user():
-    name = 'morpheus'
-    job = 'leader'
+url = 'https://reqres.in/api'
 
-    response = requests.post('https://reqres.in/api/users', data={"name": name, "job": job})
+
+# positive tests
+def test_post_create_user():
+    payload = {'name': 'morpheus', 'job': 'leader'}
+
+    response = requests.post(f'{url}/users', data=payload)
     body = response.json()
 
     assert response.status_code == 201
@@ -19,12 +22,57 @@ def test_create_user():
       validate(body, schema=json.loads(file.read()))
 
 
-def test_name_returns():
+def test_post_name_returns():
     name = 'Anna'
     job = 'CTO'
 
-    response = requests.post('https://reqres.in/api/users', data={"name": name,"job": job})
+    response = requests.post(f'{url}/users', data={"name": name,"job": job})
     body = response.json()
 
     assert response.status_code == 201
     assert body['name'] == name
+
+def test_get_single_user():
+    response = requests.get(f'{url}/users/2')
+    body = response.json()
+
+    assert body['data']['id'] == 2
+    assert response.status_code == 200
+    schema = schema_path("single_user.json")
+    with open(schema) as file:
+        validate(body, schema=json.loads(file.read()))
+
+def test_put_update_last_name():
+    last_name = 'Robbie'
+
+    response = requests.put(f'{url}/users/2', data={"last_name": last_name})
+    boby = response.json()
+
+    assert response.status_code == 200
+    assert boby['last_name'] == last_name
+
+def test_get_user_not_found():
+    response = requests.get(f'{url}/users/23')
+
+    assert response.status_code == 404
+    assert response.text == '{}'
+
+def test_delete_user():
+    response = requests.delete(f'{url}/users/2')
+
+    assert response.status_code == 204
+    assert response.text == ''
+
+def test_post_register_unsuccessful():
+    payload = {'email': "sydney@fife"}
+    response = requests.post(f'{url}/register', data=payload)
+
+    assert response.status_code == 400
+    assert response.json() == {"error": "Missing password"}
+    schema = schema_path("missing_password.json")
+    with open(schema) as file:
+        validate(response.json(), schema=json.loads(file.read()))
+
+
+
+
