@@ -1,7 +1,7 @@
 import json
 import requests
 from jsonschema import validate
-from utils.utils import schema_path
+from utils.path import schema_path
 
 
 
