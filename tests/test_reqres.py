@@ -9,7 +9,6 @@ def schema_path(name):
 url = 'https://reqres.in/api'
 
 
-# positive tests
 def test_post_create_user():
     payload = {'name': 'morpheus', 'job': 'leader'}
 
